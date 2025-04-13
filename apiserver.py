@@ -1,4 +1,18 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from logger import logger
+
+app = FastAPI()
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.info(f"Incoming request: {request.method} {request.url}")
+    try:
+        response = await call_next(request)
+        logger.info(f"Completed response: {response.status_code}")
+        return response
+    except Exception as e:
+        logger.exception(f"Unhandled exception: {e}")
+        raise
 
 app = FastAPI()
 
